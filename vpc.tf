@@ -1,9 +1,10 @@
-
 provider "aws" {
   region = var.aws_region
 }
 
-data "aws_availability_zones" "available" {}
+data "aws_availability_zones" "available" {
+  state = "available"
+}
 
 locals {
   cluster_name = "jatin-eks-${random_string.suffix.result}"
@@ -12,14 +13,16 @@ locals {
 resource "random_string" "suffix" {
   length  = 8
   special = false
+  upper   = false
 }
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  
+  version = "~> 5.0"
+
   name                 = "jatin-eks-vpc"
   cidr                 = var.vpc_cidr
-  azs                  = data.aws_availability_zones.available.names
+  azs                  = slice(data.aws_availability_zones.available.names, 0, 2)
   private_subnets      = ["10.0.1.0/24", "10.0.2.0/24"]
   public_subnets       = ["10.0.4.0/24", "10.0.5.0/24"]
   enable_nat_gateway   = true
