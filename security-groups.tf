@@ -1,11 +1,18 @@
-
 resource "aws_security_group" "all_worker_mgmt" {
   name_prefix = "all_worker_management"
   vpc_id      = module.vpc.vpc_id
+
+  tags = {
+    Name = "all_worker_management"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_security_group_rule" "all_worker_mgmt_ingress" {
-  description       = "allow inbound traffic from eks"
+  description       = "Allow inbound traffic from private RFC1918 ranges"
   from_port         = 0
   protocol          = "-1"
   to_port           = 0
@@ -19,7 +26,7 @@ resource "aws_security_group_rule" "all_worker_mgmt_ingress" {
 }
 
 resource "aws_security_group_rule" "all_worker_mgmt_egress" {
-  description       = "allow outbound traffic to anywhere"
+  description       = "Allow all outbound traffic"
   from_port         = 0
   protocol          = "-1"
   security_group_id = aws_security_group.all_worker_mgmt.id
